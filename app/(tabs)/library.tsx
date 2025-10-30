@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { auth } from '../../firebaseConfig';
 import { signOut } from "firebase/auth";
-import { Colors, Spacing, FontSizes } from '../../constants/theme';
+import { GlobalStyles, Colors} from '../../constants/theme';
 
 export default function LibraryScreen() {
   
@@ -21,12 +21,12 @@ export default function LibraryScreen() {
   return (
     <View style={styles.container}>
 
-      <Text style={styles.title}>Oi, {user ? (user.displayName) : 'Usuário'}!</Text>
+      <Text style={GlobalStyles.title}>Oi, {user ? (user.displayName) : 'Usuário'}!</Text>
       <Text style={styles.subtitle}>Bem-vindo ao soundShow.</Text>
 
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
 
-        <Text style={styles.logoutButtonText}>Sair (Logout)</Text>
+        <Text style={GlobalStyles.buttonText}>Sair (Logout)</Text>
 
       </Pressable>
     </View>
@@ -34,37 +34,25 @@ export default function LibraryScreen() {
 }
 
 const styles = StyleSheet.create({
+
+
   container: {
-    flex: 1,
+    ...GlobalStyles.container, 
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.l,
-    backgroundColor: Colors.light.background,
   },
-  title: {
-    fontSize: FontSizes.title,
-    fontWeight: 'bold',
-    color: Colors.light.text,
-    marginBottom: Spacing.m,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.m, 
-  },
+
   subtitle: {
-    fontSize: 18,
-    color: Colors.light.tabIconDefault,
-    marginBottom: Spacing.xl,
-  },
-  logoutButton: {
-    backgroundColor: '#D8000C',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: Spacing.s,
-    elevation: 5,
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
     fontSize: 16,
+    color: Colors.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+
+  logoutButton: {
+    ...GlobalStyles.button,
+    backgroundColor: Colors.error,
+    width: '80%',
   }
 });
-
