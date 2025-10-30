@@ -1,9 +1,4 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import { Platform } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
@@ -27,15 +22,26 @@ export const Colors = {
   },
 };
 
+const colors = Colors.light;
+
+export const Spacing = {
+  s: 8,
+  m: 16,
+  l: 24,
+  xl: 32,
+};
+
+export const FontSizes = {
+  title: 32,
+  input: 16,
+  button: 18,
+};
+
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -51,3 +57,71 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+
+export const GlobalStyles = StyleSheet.create({
+  
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: Spacing.l,
+    backgroundColor: colors.background,
+  },
+  
+  title: {
+    fontSize: FontSizes.title,
+    fontWeight: 'bold',
+    marginBottom: Spacing.xl,
+    textAlign: 'center',
+    color: colors.text,
+  },
+ 
+  input: {
+    height: 50,
+    backgroundColor: colors.background,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: Spacing.s,
+    marginBottom: Spacing.m,
+    paddingHorizontal: 15,
+    fontSize: FontSizes.input,
+    color: colors.text,
+  },
+  
+  button: {
+    height: 50,
+    backgroundColor: colors.tint,
+    borderRadius: Spacing.s,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Spacing.s,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
+  buttonText: {
+    color: colors.background,
+    fontSize: FontSizes.button,
+    fontWeight: 'bold',
+  },
+
+  link: {
+    color: colors.tint,
+    textAlign: 'center',
+    marginTop: Spacing.m,
+    fontSize: 16,
+  },
+
+  errorText: {
+    color: '#D8000C',
+    backgroundColor: '#FFD2D2',
+    borderRadius: Spacing.s,
+    padding: Spacing.m,
+    textAlign: 'center',
+    marginBottom: Spacing.m,
+  },
+});
+
