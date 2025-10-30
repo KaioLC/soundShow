@@ -1,13 +1,13 @@
-import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Image } from 'react-native';
 import { useState } from 'react';
 import { Link } from 'expo-router';
-import { auth } from '../firebaseConfig'; // Verifique o caminho
+import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { GlobalStyles } from '../constants/theme'; // Importa estilos globais
+import { GlobalStyles, Colors } from '../constants/theme';
 
-/**
- * Tela de Login (Signin)
- */
+
+const logo = require('../assets/images/logo.png');
+
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,7 +15,7 @@ export default function SignInScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Função de Login
+  // função que gerencia o login
   const handleSignIn = async () => {
     setError('');
     setLoading(true);
@@ -27,14 +27,11 @@ export default function SignInScreen() {
     }
 
     try {
-      // Tenta fazer o login com o email e senha
+      // tentando logar
       await signInWithEmailAndPassword(auth, email, password);
-      
-      // O "porteiro" (index.tsx) vai detectar o login e redirecionar
-      // não precisamos fazer nada aqui.
 
     } catch (e: any) {
-      // Trata erros do Firebase
+      // trata erros do firebase
       setLoading(false);
       if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
         setError('Email ou senha inválidos.');
@@ -42,53 +39,57 @@ export default function SignInScreen() {
         setError('Erro ao fazer login: ' + e.message);
       }
     } finally {
-      // (A CORREÇÃO!) Para o loading, não importa se deu certo ou errado.
       setLoading(false);
     }
   };
 
   return (
     <View style={GlobalStyles.container}>
+
+      <Image source={logo} style={GlobalStyles.logo} resizeMode="contain" />
+
       <Text style={GlobalStyles.title}>Login</Text>
 
-      {/* Input de Email */}
       <TextInput
         style={GlobalStyles.input}
         placeholder="Email"
+        placeholderTextColor={Colors.textSecondary}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
       />
 
-      {/* Input de Senha */}
       <TextInput
         style={GlobalStyles.input}
         placeholder="Senha"
+        placeholderTextColor={Colors.textSecondary}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
 
-      {/* Mostra erros, se houver */}
-      {error ? <Text style={GlobalStyles.errorText}>{error}</Text> : null}
-
-      {/* Botão de Login (com loading) */}
-      {loading ? (
-        // Mostra o ActivityIndicator DENTRO do botão
-        <Pressable style={GlobalStyles.button} disabled>
-          <ActivityIndicator color="#fff" />
-        </Pressable>
-      ) : (
-        <Pressable style={GlobalStyles.button} onPress={handleSignIn}>
-          <Text style={GlobalStyles.buttonText}>Entrar</Text>
-        </Pressable>
+      {error && (
+        <View style={GlobalStyles.errorContainer}>
+          <Text style={GlobalStyles.errorText}>{error}</Text>
+        </View>
       )}
 
-      {/* Link para ir ao Cadastro */}
-      <Link href={{ pathname: '/signup' } as any} asChild>
+    <Pressable 
+        style={GlobalStyles.button} 
+        onPress={handleSignIn} 
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={GlobalStyles.buttonText}>Entrar</Text>
+        )}
+      </Pressable>
+
+      <Link href={{ pathname: '/signup' } as any} style={GlobalStyles.linkContainer} asChild>
         <Pressable>
-          <Text style={GlobalStyles.link}>Não tem uma conta? Cadastre-se</Text>
+          <Text style={GlobalStyles.linkText}>Não tem uma conta? Cadastre-se</Text>
         </Pressable>
       </Link>
     </View>

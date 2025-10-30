@@ -1,28 +1,20 @@
-import { StyleSheet, Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+import { StyleSheet } from 'react-native';
 
 export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
-};
+  primary: '#E53935',
+  background: '#FFFFFF',
+  surface: '#F5F5F5',
+  
+  text: '#212121',
+  textSecondary: '#616161',
 
-const colors = Colors.light;
+  border: '#D3D3D3',
+  error: '#E53935',
+  errorBackground: 'rgba(229, 57, 53, 0.1)',
+
+  white: '#FFFFFF',
+  black: '#000000',
+};
 
 export const Spacing = {
   s: 8,
@@ -31,33 +23,12 @@ export const Spacing = {
   xl: 32,
 };
 
+
 export const FontSizes = {
   title: 32,
   input: 16,
   button: 18,
 };
-
-export const Fonts = Platform.select({
-  ios: {
-    sans: 'system-ui',
-    serif: 'ui-serif',
-    rounded: 'ui-rounded',
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
-
 
 export const GlobalStyles = StyleSheet.create({
   
@@ -65,63 +36,72 @@ export const GlobalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: Spacing.l,
-    backgroundColor: colors.background,
+    backgroundColor: Colors.background,
   },
-  
+
   title: {
     fontSize: FontSizes.title,
     fontWeight: 'bold',
-    marginBottom: Spacing.xl,
+    color: Colors.text,
     textAlign: 'center',
-    color: colors.text,
+    marginBottom: Spacing.xl,
   },
- 
+
   input: {
-    height: 50,
-    backgroundColor: colors.background,
-    borderColor: '#ddd',
-    borderWidth: 1,
+    height: 55,
+    backgroundColor: Colors.surface,
+    color: Colors.text,
+    paddingHorizontal: Spacing.m,
     borderRadius: Spacing.s,
     marginBottom: Spacing.m,
-    paddingHorizontal: 15,
     fontSize: FontSizes.input,
-    color: colors.text,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   
   button: {
-    height: 50,
-    backgroundColor: colors.tint,
-    borderRadius: Spacing.s,
+    height: 55,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: Spacing.s,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderRadius: 50,
+    marginVertical: Spacing.s,
   },
 
   buttonText: {
-    color: colors.background,
     fontSize: FontSizes.button,
     fontWeight: 'bold',
+    color: Colors.white,
   },
 
-  link: {
-    color: colors.tint,
+  linkContainer: {
+    marginVertical: Spacing.m,
+  },
+  linkText: {
+    color: Colors.primary,
     textAlign: 'center',
-    marginTop: Spacing.m,
-    fontSize: 16,
+    fontWeight: '600',
+    fontSize: 15,
   },
 
-  errorText: {
-    color: '#D8000C',
-    backgroundColor: '#FFD2D2',
-    borderRadius: Spacing.s,
+  errorContainer: {
+    backgroundColor: Colors.errorBackground,
     padding: Spacing.m,
-    textAlign: 'center',
+    borderRadius: Spacing.s,
     marginBottom: Spacing.m,
+    borderWidth: 1,
+    borderColor: Colors.error,
+  },
+  errorText: {
+    color: Colors.text,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  logo: {
+    width: 500,
+    height: 300,
+    alignSelf: 'center',
+    marginBottom: Spacing.xl,
   },
 });
 

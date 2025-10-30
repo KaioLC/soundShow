@@ -1,9 +1,12 @@
-import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Image } from 'react-native';
 import { useState } from 'react';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { auth } from '../firebaseConfig';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { GlobalStyles } from '../constants/theme';
+import { GlobalStyles, Colors } from '../constants/theme';
+
+const logo = require('../assets/images/logo.png');
+
 
 export default function SignUpScreen() {
   const [username, setUsername] = useState('');
@@ -68,56 +71,69 @@ export default function SignUpScreen() {
 
   return (
     <View style={GlobalStyles.container}>
+
+      <Image source={logo} style={GlobalStyles.logo} resizeMode="contain" />
+
       <Text style={GlobalStyles.title}>Criar Conta</Text>
 
       <TextInput
         style={GlobalStyles.input}
         placeholder="Nome de Usuário"
+        placeholderTextColor={Colors.textSecondary}
         value={username}
         onChangeText={setUsername}
-        autoCapitalize="none"
+        autoCapitalize="words"
       />
 
       <TextInput
         style={GlobalStyles.input}
         placeholder="Email"
+        placeholderTextColor={Colors.textSecondary}
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
         autoCapitalize="none"
+        keyboardType="email-address"
       />
 
       <TextInput
         style={GlobalStyles.input}
         placeholder="Senha (mín. 6 caracteres)"
+        placeholderTextColor={Colors.textSecondary}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
+
       <TextInput
         style={GlobalStyles.input}
         placeholder="Confirmar Senha"
+        placeholderTextColor={Colors.textSecondary}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
 
-      {error ? <Text style={GlobalStyles.errorText}>{error}</Text> : null}
-
-      {loading ? (
-
-        <Pressable style={GlobalStyles.button} disabled>
-          <ActivityIndicator color="#fff" />
-        </Pressable>
-      ) : (
-        <Pressable style={GlobalStyles.button} onPress={handleSignUp}>
-          <Text style={GlobalStyles.buttonText}>Cadastrar</Text>
-        </Pressable>
+      {error && (
+        <View style={GlobalStyles.errorContainer}>
+          <Text style={GlobalStyles.errorText}>{error}</Text>
+        </View>
       )}
 
-      <Link href={{ pathname: '/signin' } as any} asChild>
+      <Pressable 
+        style={GlobalStyles.button} 
+        onPress={handleSignUp} 
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={GlobalStyles.buttonText}>Cadastrar</Text>
+        )}
+      </Pressable>
+
+      <Link href={{ pathname: '/signin' } as any} style={GlobalStyles.linkContainer} asChild>
         <Pressable>
-          <Text style={GlobalStyles.link}>Já tem uma conta? Faça login</Text>
+          <Text style={GlobalStyles.linkText}>Já tem uma conta? Faça login</Text>
         </Pressable>
       </Link>
     </View>
