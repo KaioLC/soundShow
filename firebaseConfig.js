@@ -7,7 +7,7 @@ import { getFirestore } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: "AIzaSyCb0bWuyziUmMzsTtBM3x6G4zykMwei0Cc",
   authDomain: "soundshow-app.firebaseapp.com",
-  projectId: "soundShow-app",
+  projectId: "soundshow-app",
   storageBucket: "soundshow-app.firebasestorage.app",
   messagingSenderId: "121324960557",
   appId: "1:121324960557:web:193f70407dcb2e308131a4",
