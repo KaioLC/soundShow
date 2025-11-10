@@ -26,27 +26,33 @@ interface Sound {
 }
 
 // importando funções do firestore
+import { Audio } from 'expo-av'; // pra ouvir a musica
 import { collection, DocumentData, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
+
 
 export default function LibraryScreen() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [soundObjects, setSoundObjects] = useState<Audio.Sound | null>(null); // salva a musica atual (que esta tocando)
 
   useEffect(() => {
     
     const fetchSounds = async () => {
       
       try {
+
         console.log("Buscando sons do Firestore...");
         const soundsCollection = collection(db, 'sounds');
+        console.log("Referência da coleção 'sounds' obtida:", soundsCollection);
         const soundsSnapshot = await getDocs(soundsCollection);
+        console.log("Documentos obtidos:", soundsSnapshot.size);
         
         if (soundsSnapshot.empty) {
           console.log("Firestore: Nenhum documento encontrado na coleção 'sounds'");
         }
         
+        console.log("Processando documentos...");
         const soundsList: Sound[] = soundsSnapshot.docs.map(
           (doc: QueryDocumentSnapshot<DocumentData>) => {
             const data = doc.data();
@@ -57,7 +63,7 @@ export default function LibraryScreen() {
             } as Sound;
           }
         );
-        
+        console.log("Sons processados:", soundsList.length);
         setSounds(soundsList);
         
       } catch (error) {
@@ -90,14 +96,47 @@ export default function LibraryScreen() {
     
   }, []);
 
+  // useEffect pra limpeza de som (unmount)
+  useEffect(() => {
+
+    return () => {
+      if (soundObjects) {
+        console.log("Descarregando objetos de som...");
+        soundObjects.unloadAsync();
+      }
+    };
+  }, [soundObjects]);
+
   const handleLogout = () => {
     signOut(auth);
   };
 
-  const handlePlaySound = (sound: Sound) => {
+  const handlePlaySound = async (sound: Sound) => {
    
     console.log("Tocar o som:", sound.title, sound.streamUrl);
 
+    try {
+      // caso um som ja estiver tocando, descarrega ele antes e toca o novo
+      if(soundObjects) {
+        console.log("Descarregando som anterior...");
+        soundObjects.unloadAsync();
+        setSoundObjects(null);
+      }
+
+      console.log("Carregando novo som...");
+
+      // criando novo objeto de som
+      const { sound: newSoundObject } = await Audio.Sound.createAsync(
+        { uri: sound.streamUrl },
+        { shouldPlay: true }
+      );
+
+      console.log("Tocando o som:", sound.title);
+      setSoundObjects(newSoundObject);
+      
+    } catch (error) {
+      console.error("Erro ao tocar o som:", error);
+    }
   };
 
   // renderizando cada item da lista
