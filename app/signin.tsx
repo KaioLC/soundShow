@@ -1,9 +1,9 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, Image } from 'react-native';
-import { useState } from 'react';
 import { Link } from 'expo-router';
-import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { GlobalStyles, Colors } from '../constants/theme';
+import { useState } from 'react';
+import { ActivityIndicator, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Colors, GlobalStyles } from '../constants/theme';
+import { auth } from '../firebaseConfig';
 
 
 const logo = require('../assets/images/logo.png');
@@ -28,6 +28,7 @@ export default function SignInScreen() {
 
     try {
       // tentando logar
+      console.log("attempting to sign in with email:", email);
       await signInWithEmailAndPassword(auth, email, password);
 
     } catch (e: any) {

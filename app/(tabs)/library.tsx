@@ -1,9 +1,9 @@
-import { FontAwesome } from '@expo/vector-icons'; // pro icone de play
+import { FontAwesome } from '@expo/vector-icons';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList, // utilizar pra listas performaticas
+  FlatList,
   Image,
   Pressable,
   StyleSheet,
@@ -12,88 +12,149 @@ import {
   View
 } from 'react-native';
 import { Colors, GlobalStyles, Spacing } from '../../constants/theme';
-import { auth, db } from '../../firebaseConfig'; // importando db do firebaseConfig
+import { auth, db } from '../../firebaseConfig';
 
-// definindo model do som
+
+// model do som
 interface Sound {
   id: string;
   title: string;
   artist: string;
   artworkUrl: string; // URL da capa
   streamUrl: string;  // URL do .mp3
+  genre: string;
 }
 
 // importando funções do firestore
+import { Audio } from 'expo-av'; // pra ouvir a musica
 import { collection, DocumentData, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
+
 
 export default function LibraryScreen() {
   const [displayName, setDisplayName] = useState<string | null>(null);
-  const [sounds, setSounds] = useState<Sound[]>([]); // ⬅️ Estado para a lista de sons
-  const [loading, setLoading] = useState(true);   // ⬅️ Estado de carregamento
+  const [sounds, setSounds] = useState<Sound[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [soundObjects, setSoundObjects] = useState<Audio.Sound | null>(null); // salva a musica atual (que esta tocando)
 
-  // buscar o nome do usuário
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
-      if (user) {
-        setDisplayName(user.displayName || user.email);
-      } else {
-        setDisplayName(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // buscar os sons do Firestore
-  useEffect(() => {
+    
     const fetchSounds = async () => {
-      setLoading(true);
+      
       try {
-        const soundsCollection = collection(db, 'sounds'); // buscando coleção 'sounds'
+
+        console.log("Buscando sons do Firestore...");
+        const soundsCollection = collection(db, 'sounds');
+        console.log("Referência da coleção 'sounds' obtida:", soundsCollection);
         const soundsSnapshot = await getDocs(soundsCollection);
+        console.log("Documentos obtidos:", soundsSnapshot.size);
         
+        if (soundsSnapshot.empty) {
+          console.log("Firestore: Nenhum documento encontrado na coleção 'sounds'");
+        }
+        
+        console.log("Processando documentos...");
         const soundsList: Sound[] = soundsSnapshot.docs.map(
-          (doc: QueryDocumentSnapshot<DocumentData>) => ({
-            id: doc.id,
-            ...doc.data(),
-          } as Sound)
+          (doc: QueryDocumentSnapshot<DocumentData>) => {
+            const data = doc.data();
+            console.log("Música encontrada:", data.title);
+            return {
+              id: doc.id,
+              ...data,
+            } as Sound;
+          }
         );
-        
-        setSounds(soundsList); // salvando a lista de sons no estado
+        console.log("Sons processados:", soundsList.length);
+        setSounds(soundsList);
         
       } catch (error) {
         console.error("Erro ao buscar sons: ", error);
-
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSounds();
+    // autenticando login
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      if (user) {
+        // usuario logado
+        console.log("Usuário logado:", user.email); // DEBUG
+        setDisplayName(user.displayName || user.email);
+        
+        // buscando sons depois do usuario estar logado
+        fetchSounds(); 
+        
+      } else {
+        // usuario deslogado
+        console.log("Usuário deslogado.");
+        setDisplayName(null);
+        setSounds([]); // limpa a lista de sons
+        setLoading(false); 
+      }
+    });
+
+    return () => unsubscribe();
+    
   }, []);
+
+  // useEffect pra limpeza de som (unmount)
+  useEffect(() => {
+
+    return () => {
+      if (soundObjects) {
+        console.log("Descarregando objetos de som...");
+        soundObjects.unloadAsync();
+      }
+    };
+  }, [soundObjects]);
 
   const handleLogout = () => {
     signOut(auth);
   };
 
-  const handlePlaySound = (sound: Sound) => {
+  const handlePlaySound = async (sound: Sound) => {
+   
+    console.log("Tocar o som:", sound.title, sound.streamUrl);
 
-    console.log("Tocar o som:", sound.title);
+    try {
+      // caso um som ja estiver tocando, descarrega ele antes e toca o novo
+      if(soundObjects) {
+        console.log("Descarregando som anterior...");
+        soundObjects.unloadAsync();
+        setSoundObjects(null);
+      }
 
+      console.log("Carregando novo som...");
+
+      // criando novo objeto de som
+      const { sound: newSoundObject } = await Audio.Sound.createAsync(
+        { uri: sound.streamUrl },
+        { shouldPlay: true }
+      );
+
+      console.log("Tocando o som:", sound.title);
+      setSoundObjects(newSoundObject);
+      
+    } catch (error) {
+      console.error("Erro ao tocar o som:", error);
+    }
   };
 
-  // componente responsavel por renderizar cada item da lista
+  // renderizando cada item da lista
   const renderSoundItem = ({ item }: { item: Sound }) => (
     <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
       <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
       <View style={styles.soundInfo}>
         <Text style={styles.soundTitle}>{item.title}</Text>
         <Text style={styles.soundArtist}>{item.artist}</Text>
+
+        {item.genre && (
+           <Text style={styles.soundGenre}>{item.genre}</Text>
+        )}
       </View>
       <FontAwesome name="play-circle" size={32} color={Colors.primary} />
     </TouchableOpacity>
   );
 
-  // cabeçalho
   const ListHeader = () => (
     <View style={styles.headerContainer}>
       <Text style={GlobalStyles.title}>
@@ -107,21 +168,22 @@ export default function LibraryScreen() {
 
   return (
     <View style={styles.container}>
-      {loading && sounds.length === 0 ? (
-       
-        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 50 }} />
+    
+      {loading ? (
+        <View>
+          {displayName && <ListHeader />} 
+          <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 50 }} />
+        </View>
       ) : (
         <FlatList
-          data={sounds} // dados da lista
-          renderItem={renderSoundItem} 
-          keyExtractor={(item) => item.id}
+          data={sounds}
+          renderItem={renderSoundItem}
+          keyExtractor={(item) => item.id} 
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={
-            // essa linha de baixo só mostra caso nao tenha nenhum item na lista
             <Text style={styles.emptyText}>Nenhum som encontrado na biblioteca.</Text>
           }
-
-          ListFooterComponent={<View style={{ height: 50 }} />} 
+          ListFooterComponent={<View style={{ height: 50 }} />}
         />
       )}
     </View>
@@ -131,7 +193,7 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     ...GlobalStyles.container,
-    paddingHorizontal: 0,
+    paddingHorizontal: 0, 
     paddingTop: Spacing.xl,
     justifyContent: 'flex-start',
   },
@@ -173,6 +235,13 @@ const styles = StyleSheet.create({
   soundArtist: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+
+  soundGenre: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: 'bold',
+    marginTop: 4,
   },
   emptyText: {
     textAlign: 'center',
