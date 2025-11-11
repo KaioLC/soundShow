@@ -26,15 +26,15 @@ interface Sound {
 }
 
 // importando funções do firestore
-import { Audio } from 'expo-av'; // pra ouvir a musica
 import { collection, DocumentData, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
-
+import { useAudioPlayer } from '../../context/AudioPlayerContext';
 
 export default function LibraryScreen() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [loading, setLoading] = useState(true);
-  const [soundObjects, setSoundObjects] = useState<Audio.Sound | null>(null); // salva a musica atual (que esta tocando)
+  
+  const { loadSound, currentTrack, isPlaying } = useAudioPlayer();
 
   useEffect(() => {
     
@@ -96,69 +96,44 @@ export default function LibraryScreen() {
     
   }, []);
 
-  // useEffect pra limpeza de som (unmount)
-  useEffect(() => {
-
-    return () => {
-      if (soundObjects) {
-        console.log("Descarregando objetos de som...");
-        soundObjects.unloadAsync();
-      }
-    };
-  }, [soundObjects]);
-
   const handleLogout = () => {
     signOut(auth);
   };
 
-  const handlePlaySound = async (sound: Sound) => {
+  // função que envia o som pro context tocar
+  const handlePlaySound = (sound: Sound) => {
    
-    console.log("Tocar o som:", sound.title, sound.streamUrl);
-
-    try {
-      // caso um som ja estiver tocando, descarrega ele antes e toca o novo
-      if(soundObjects) {
-        console.log("Descarregando som anterior...");
-        soundObjects.unloadAsync();
-        setSoundObjects(null);
-      }
-
-      console.log("Carregando novo som...");
-
-      // criando novo objeto de som
-      const { sound: newSoundObject } = await Audio.Sound.createAsync(
-        { uri: sound.streamUrl },
-        { shouldPlay: true }
-      );
-
-      console.log("Tocando o som:", sound.title);
-      setSoundObjects(newSoundObject);
-      
-    } catch (error) {
-      console.error("Erro ao tocar o som:", error);
-    }
+    console.log("tela da biblioteca está pedindo pro context tocar:", sound.title, sound.streamUrl);
+    loadSound(sound);
+  
   };
 
   // renderizando cada item da lista
-  const renderSoundItem = ({ item }: { item: Sound }) => (
-    <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
-      <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
-      <View style={styles.soundInfo}>
-        <Text style={styles.soundTitle}>{item.title}</Text>
-        <Text style={styles.soundArtist}>{item.artist}</Text>
+  const renderSoundItem = ({ item }: { item: Sound }) => {
 
-        {item.genre && (
-           <Text style={styles.soundGenre}>{item.genre}</Text>
-        )}
-      </View>
-      <FontAwesome name="play-circle" size={32} color={Colors.primary} />
-    </TouchableOpacity>
-  );
+    const isCurrentTrack = currentTrack?.id === item.id;
+    const iconName = isCurrentTrack && isPlaying ? 'pause-circle' : 'play-circle';
+    const iconColor = isCurrentTrack ? Colors.primary : Colors.text;
+
+    return (
+      <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
+        <Image source={ {uri: item.artworkUrl} } style={styles.artwork} />
+        <View style={styles.soundInfo}>
+          <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary}] }>{item.title}</Text>
+          <Text style={styles.soundArtist}>{item.artist}</Text>
+          {item.genre && (
+            <Text style={styles.soundGenre}>{item.genre}</Text>
+          )}
+        </View>
+        <FontAwesome name={iconName} size={32} color={iconColor} />
+      </TouchableOpacity>
+    );
+  };
 
   const ListHeader = () => (
     <View style={styles.headerContainer}>
       <Text style={GlobalStyles.title}>
-        Oi, {displayName || 'Usuário'}!
+        Bem vindo, {displayName || 'Usuário'}!
       </Text>
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
         <Text style={GlobalStyles.buttonText}>Sair</Text>
@@ -196,6 +171,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0, 
     paddingTop: Spacing.xl,
     justifyContent: 'flex-start',
+    paddingBottom: 0,
   },
   headerContainer: {
     paddingHorizontal: Spacing.l,
