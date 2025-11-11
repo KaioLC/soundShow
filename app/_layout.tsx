@@ -1,6 +1,7 @@
 import { Stack, router } from 'expo-router';
-import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect } from 'react';
+import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import { auth } from '../firebaseConfig';
 
 export default function RootLayout() {
@@ -22,12 +23,13 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="signin" options={{ headerShown: false }} />
-      <Stack.Screen name="signup" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <AudioPlayerProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="signin" options={{ headerShown: false }} />
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </AudioPlayerProvider>
   );
 }
-
