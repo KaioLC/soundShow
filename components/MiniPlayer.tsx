@@ -7,6 +7,9 @@ import { useAudioPlayer } from '../context/AudioPlayerContext';
 
 // função pra formatar milissegundos em mm:ss
 function formatMillis(millis: number) {
+
+    if(!millis) return '0:00';
+
   const totalSeconds = millis / 1000;
   const seconds = Math.floor(totalSeconds % 60);
   const minutes = Math.floor(totalSeconds / 60);
@@ -43,7 +46,10 @@ export default function MiniPlayer() {
         thumbTintColor={Colors.primary}
       />
       
-   
+      <View style={styles.timeContainer}>
+        <Text style={styles.timeText}>{formatMillis(positionMillis)}</Text>
+        <Text style={styles.timeText}>{formatMillis(durationMillis as any)}</Text>
+      </View>
       <View style={styles.content}>
         <Image 
           source={{ uri: currentTrack.artworkUrl || 'https://placehold.co/60' }} 
@@ -82,6 +88,16 @@ const styles = StyleSheet.create({
     height: 20,
     position: 'absolute',
     top: -10,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.s,
+    marginTop: -2,
+ },
+  timeText: {
+    color: Colors.textSecondary,
+    fontSize: 10,
   },
   content: {
     flexDirection: 'row',
