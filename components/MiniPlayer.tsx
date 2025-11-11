@@ -22,7 +22,9 @@ export default function MiniPlayer() {
     isPlaying, 
     togglePlayPause, 
     playbackStatus,
-    seekPlayback
+    seekPlayback,
+    currentVolume,
+    setVolume,
   } = useAudioPlayer();
 
   // sem musica, nao exibe nada
@@ -50,14 +52,31 @@ export default function MiniPlayer() {
         <Text style={styles.timeText}>{formatMillis(positionMillis)}</Text>
         <Text style={styles.timeText}>{formatMillis(durationMillis as any)}</Text>
       </View>
+
       <View style={styles.content}>
         <Image 
           source={{ uri: currentTrack.artworkUrl || 'https://placehold.co/60' }} 
           style={styles.artwork} 
         />
+
         <View style={styles.info}>
           <Text style={styles.title}>{currentTrack.title}</Text>
           <Text style={styles.artist}>{currentTrack.artist}</Text>
+        </View>
+
+        <View style={styles.volumeContainer}>
+            <FontAwesome name="volume-down" size={16} color={Colors.textSecondary} />
+            <Slider
+                style={styles.volumeSlider}
+                minimumValue={0}
+                maximumValue={1}
+                value={currentVolume}
+                onSlidingComplete={setVolume} // chama a funcao lá do context
+                minimumTrackTintColor={Colors.text}
+                maximumTrackTintColor={Colors.border}
+                thumbTintColor={Colors.text}
+            />
+            <FontAwesome name="volume-up" size={16} color={Colors.textSecondary} />
         </View>
 
         <TouchableOpacity onPress={togglePlayPause} style={styles.playButton}>
@@ -123,6 +142,16 @@ const styles = StyleSheet.create({
   artist: {
     fontSize: 12,
     color: Colors.textSecondary,
+  },
+  volumeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 100,
+    marginHorizontal: Spacing.s,
+  },
+  volumeSlider: {
+    flex: 1,
+    height: 20,
   },
   playButton: {
     padding: Spacing.s,

@@ -20,6 +20,9 @@ interface AudioPlayerContextData {
   loadSound: (track: Sound) => Promise<void>;
   togglePlayPause: () => Promise<void>;
   seekPlayback: (position: number) => Promise<void>;
+
+  currentVolume: number;
+  setVolume: (value: number) => Promise<void>;
 }
 
 // criando o contexto
@@ -27,10 +30,13 @@ const AudioPlayerContext = createContext<AudioPlayerContextData | undefined>(und
 
 // o componente que vai prover o contexto
 export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
   const [soundObject, setSoundObject] = useState<Audio.Sound | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null);
+
+  const [currentVolume, setCurrentVolume] = useState(1.0); // volume entre 0.0 e 1.0
 
   // função que atualiza o progresso da musica
   const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
@@ -71,7 +77,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       console.log("Context: Carregando novo som...");
       const { sound } = await Audio.Sound.createAsync(
         { uri: track.streamUrl },
-        { shouldPlay: true }, // toca assim que carregar
+        { shouldPlay: true, volume: currentVolume }, // toca assim que carregar e com o volume predefinido
         onPlaybackStatusUpdate // define o callback de status
       );
       
@@ -96,7 +102,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       console.log("Context: Tocando (resume)...");
       await soundObject.playAsync();
     }
-    setIsPlaying(!isPlaying); // Inverte o estado
+    setIsPlaying(!isPlaying); // inverte o estado
   };
   
   // função que controla o slider de progresso
@@ -106,6 +112,13 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
 
+  // funcao pra ajustar o volume
+  const setVolume = async (value: number) => {
+    if (soundObject) {
+    await soundObject.setVolumeAsync(value);
+    setCurrentVolume(value);
+    }
+  };
   // garante que o som é descarregado quando o componente é desmontado
   useEffect(() => {
     return () => {
@@ -123,6 +136,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         loadSound,
         togglePlayPause,
         seekPlayback,
+        currentVolume,
+        setVolume,
       }}
     >
       {children}
