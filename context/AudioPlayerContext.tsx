@@ -1,5 +1,8 @@
 import { Audio, AVPlaybackStatus } from 'expo-av';
+import { doc, increment, updateDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { db } from '../firebaseConfig';
+
 
 // definindo interface do som
 interface Sound {
@@ -9,6 +12,7 @@ interface Sound {
   artworkUrl: string;
   streamUrl: string;
   genre: string;
+  playCount?: number;
 }
 
 // o que o contexto vai fornecer
@@ -23,6 +27,8 @@ interface AudioPlayerContextData {
 
   currentVolume: number;
   setVolume: (value: number) => Promise<void>;
+
+  unloadSound: () => Promise<void>;
 }
 
 // criando o contexto
@@ -70,6 +76,15 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     await unloadSound();
 
     try {
+
+      const soundRef = doc(db, 'sounds', track.id);
+
+      await updateDoc(soundRef, {
+        playCount: increment(1)
+      });
+
+      console.log("Play count atualizado no Firestore para a música:", track.title);
+
       await Audio.setAudioModeAsync({
         playsInSilentModeIOS: true,
       });
@@ -138,6 +153,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         seekPlayback,
         currentVolume,
         setVolume,
+        unloadSound,
       }}
     >
       {children}

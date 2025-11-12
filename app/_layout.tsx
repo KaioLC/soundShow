@@ -11,7 +11,7 @@ export default function RootLayout() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // usuário logado, mandando para a tela principal
-        router.replace('/(tabs)/library');
+        router.replace('/(tabs)/home');
       } else {
         // usuario não ta logado, mandando para a tela de login
         router.replace('/signin');

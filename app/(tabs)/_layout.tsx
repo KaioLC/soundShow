@@ -18,33 +18,36 @@ function TabLayout() {
         screenOptions={{
           tabBarActiveTintColor: Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
+          
+          // empurra as tabs pra cima quando o miniplayer tá visível
           tabBarStyle: {
             backgroundColor: Colors.background,
             borderTopColor: Colors.border,
-
-            height: 60,
+            height: 70,
             paddingBottom: 5,
-
-            bottom: currentTrack ? MINI_PLAYER_HEIGHT : 0, // ajusta altura se o miniplayer estiver visível (pra nao atropelar as abas)
+            
+            // se tiver musica tocando, sobe a tabBar
+            bottom: currentTrack ? MINI_PLAYER_HEIGHT : 0, 
           },
+          
           headerStyle: {
             backgroundColor: Colors.background,
           },
           headerTitleStyle: {
             color: Colors.text,
           },
-          // headerShown: false,
-          // tabBarButton: HapticTab,
         }}>
+        
         <Tabs.Screen
-          name="library"
+          name="home"
           options={{
-            title: 'Biblioteca',
+            title: 'Início',
             tabBarIcon: ({ color }) => (
-              <FontAwesome size={24} name="book" color={color} />
+              <FontAwesome size={24} name="home" color={color} />
             ),
           }}
         />
+
         <Tabs.Screen
           name="explore"
           options={{
@@ -54,14 +57,34 @@ function TabLayout() {
             ),
           }}
         />
+
+        <Tabs.Screen
+          name="playlists"
+          options={{
+            title: 'Playlists',
+            tabBarIcon: ({ color }) => (
+              <FontAwesome size={24} name="list-ul" color={color} />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Perfil',
+            tabBarIcon: ({ color }) => (
+              <FontAwesome size={24} name="user" color={color} />
+            ),
+          }}
+        />
+
       </Tabs>
 
-      <MiniPlayer /> /* O miniplayer fica renderizado aqui */
+      <MiniPlayer />
     </View>
   );
 }
 
-// envolvendo o TabLayout com o AudioPlayerProvider pra poder usar o hook 'useAudioPlayer' em qualquer aba
 export default function TabsLayoutWithProvider () {
 
   return (
