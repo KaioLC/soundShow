@@ -1,11 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Image,
-  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,10 +22,11 @@ interface Sound {
   artworkUrl: string; // URL da capa
   streamUrl: string;  // URL do .mp3
   genre: string;
+  playCount?: number;
 }
 
 // importando funções do firestore
-import { collection, DocumentData, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
+import { collection, DocumentData, getDocs, limit, orderBy, query, QueryDocumentSnapshot } from 'firebase/firestore';
 import { useAudioPlayer } from '../../context/AudioPlayerContext';
 
 export default function LibraryScreen() {
@@ -42,10 +42,17 @@ export default function LibraryScreen() {
       
       try {
 
-        console.log("Buscando sons do Firestore...");
+        console.log("Buscando top 5 sons do Firestore...");
         const soundsCollection = collection(db, 'sounds');
         console.log("Referência da coleção 'sounds' obtida:", soundsCollection);
-        const soundsSnapshot = await getDocs(soundsCollection);
+
+        // query para obter os 5 sons mais tocados (decrescente)
+        const top5Query = query(
+          soundsCollection, 
+          orderBy('playCount', 'desc'), 
+          limit(5)
+        );
+        const soundsSnapshot = await getDocs(top5Query);
         console.log("Documentos obtidos:", soundsSnapshot.size);
         
         if (soundsSnapshot.empty) {
@@ -96,10 +103,7 @@ export default function LibraryScreen() {
     
   }, []);
 
-  const handleLogout = () => {
-    signOut(auth);
-  };
-
+ 
   // função que envia o som pro context tocar
   const handlePlaySound = (sound: Sound) => {
    
@@ -117,14 +121,22 @@ export default function LibraryScreen() {
 
     return (
       <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
-        <Image source={ {uri: item.artworkUrl} } style={styles.artwork} />
+        <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
         <View style={styles.soundInfo}>
-          <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary}] }>{item.title}</Text>
+          <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
+            {item.title}
+          </Text>
           <Text style={styles.soundArtist}>{item.artist}</Text>
           {item.genre && (
-            <Text style={styles.soundGenre}>{item.genre}</Text>
+             <Text style={styles.soundGenre}>{item.genre}</Text>
           )}
         </View>
+        
+        <View style={styles.playCountContainer}>
+          <FontAwesome name="play" size={12} color={Colors.textSecondary} />
+          <Text style={styles.playCountText}>{item.playCount || 0}</Text>
+        </View>
+        
         <FontAwesome name={iconName} size={32} color={iconColor} />
       </TouchableOpacity>
     );
@@ -132,33 +144,27 @@ export default function LibraryScreen() {
 
   const ListHeader = () => (
     <View style={styles.headerContainer}>
-      <Text style={GlobalStyles.title}>
-        Bem vindo, {displayName || 'Usuário'}!
-      </Text>
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={GlobalStyles.buttonText}>Sair</Text>
-      </Pressable>
+      <Text style={GlobalStyles.title}>Top 5 Músicas</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-    
       {loading ? (
         <View>
-          {displayName && <ListHeader />} 
+          <ListHeader /> 
           <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 50 }} />
         </View>
       ) : (
         <FlatList
           data={sounds}
           renderItem={renderSoundItem}
-          keyExtractor={(item) => item.id} 
+          keyExtractor={(item) => item.id}
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Nenhum som encontrado na biblioteca.</Text>
+            <Text style={styles.emptyText}>Nenhuma música encontrada.</Text>
           }
-          ListFooterComponent={<View style={{ height: 50 }} />}
+          ListFooterComponent={<View style={{ height: 80 }} />}
         />
       )}
     </View>
@@ -168,7 +174,7 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     ...GlobalStyles.container,
-    paddingHorizontal: 0, 
+    paddingHorizontal: 0,
     paddingTop: Spacing.xl,
     justifyContent: 'flex-start',
     paddingBottom: 0,
@@ -177,15 +183,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.l,
     marginBottom: Spacing.m,
   },
-  logoutButton: {
-    ...GlobalStyles.button,
-    backgroundColor: Colors.error,
-    height: 45,
-    width: '50%',
-    alignSelf: 'center',
-    marginTop: Spacing.m,
-  },
-
   soundItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -212,12 +209,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
   },
-
   soundGenre: {
     fontSize: 12,
     color: Colors.primary,
     fontWeight: 'bold',
     marginTop: 4,
+  },
+  playCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: Spacing.m,
+  },
+  playCountText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginLeft: Spacing.s / 2,
+    fontStyle: 'italic',
   },
   emptyText: {
     textAlign: 'center',
