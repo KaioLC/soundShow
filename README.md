@@ -1,8 +1,3 @@
-
-<p align="center">
-  <img src="assets/images/logo.png" width="500">
-</p>
-
 # SoundShow - Streaming de Música
 
  Esta é uma aplicação de streaming de música, construída com React Native (Expo) e Firebase. É um projeto que demonstra o desenvolvimento de uma aplicação de streaming de música do zero, com uma arquitetura e funcionalidades do mundo real.
