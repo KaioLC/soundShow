@@ -23,8 +23,9 @@ export default function LibraryScreen() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const { loadSound, currentTrack, isPlaying } = useAudioPlayer();
+
+
+  const { loadSound, currentTrack, isPlaying, setModalTrack } = useAudioPlayer();
 
   useEffect(() => {
     
@@ -102,6 +103,11 @@ export default function LibraryScreen() {
   
   };
 
+  // funcao pra renderizar o modal
+  const handleOpenModal = (track: Sound) => {
+    setModalTrack(track);
+  }
+
   // renderizando cada item da lista
   const renderSoundItem = ({ item }: { item: Sound }) => {
 
@@ -110,25 +116,35 @@ export default function LibraryScreen() {
     const iconColor = isCurrentTrack ? Colors.primary : Colors.text;
 
     return (
-      <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
-        <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
-        <View style={styles.soundInfo}>
-          <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
-            {item.title}
-          </Text>
-          <Text style={styles.soundArtist}>{item.artist}</Text>
-          {item.genre && (
-             <Text style={styles.soundGenre}>{item.genre}</Text>
-          )}
-        </View>
-        
-        <View style={styles.playCountContainer}>
-          <FontAwesome name="play" size={12} color={Colors.textSecondary} />
-          <Text style={styles.playCountText}>{item.playCount || 0}</Text>
-        </View>
-        
-        <FontAwesome name={iconName} size={32} color={iconColor} />
-      </TouchableOpacity>
+
+      <View style={styles.soundItemContainer}>
+        {/* Item clicável (para tocar) */}
+        <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
+          <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
+          <View style={styles.soundInfo}>
+            <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
+              {item.title}
+            </Text>
+            <Text style={styles.soundArtist}>{item.artist}</Text>
+            
+            <Text style={styles.playCount}>
+              <FontAwesome name="play" size={12} color={Colors.textSecondary} />
+              {/* Se playCount não existir, mostra 0 */}
+              {` ${item.playCount || 0} plays`} 
+            </Text>
+            
+          </View>
+          <FontAwesome name={iconName} size={32} color={iconColor} />
+        </TouchableOpacity>
+
+        {/* 4. BOTÃO "+" PARA ADICIONAR À PLAYLIST */}
+        <TouchableOpacity 
+          style={styles.plusButton} 
+          onPress={() => handleOpenModal(item)} // ⬅️ Chama a nova função
+        >
+          <FontAwesome name="plus" size={16} color={Colors.textSecondary} />
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -173,13 +189,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.l,
     marginBottom: Spacing.m,
   },
+  
+  soundItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: Spacing.l,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
   soundItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.m,
+    flex: 1, // ⬅️ ESTE É O VILÃO
+  },
+  plusButton: {
     paddingHorizontal: Spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingVertical: Spacing.m,
   },
   artwork: {
     width: 60,
@@ -199,22 +225,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
   },
+  playCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
   soundGenre: {
     fontSize: 12,
     color: Colors.primary,
     fontWeight: 'bold',
     marginTop: 4,
-  },
-  playCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: Spacing.m,
-  },
-  playCountText: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginLeft: Spacing.s / 2,
-    fontStyle: 'italic',
   },
   emptyText: {
     textAlign: 'center',
