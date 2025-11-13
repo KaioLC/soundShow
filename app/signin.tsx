@@ -1,8 +1,19 @@
 import { Link } from 'expo-router';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, Text, TextInput, View } from 'react-native';
-import { Colors, GlobalStyles } from '../constants/theme';
+import {
+  ActivityIndicator, Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text, TextInput,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native';
+import { Colors, GlobalStyles, Spacing } from '../constants/theme';
 import { auth } from '../firebaseConfig';
 
 
@@ -45,55 +56,78 @@ export default function SignInScreen() {
   };
 
   return (
-    <View style={GlobalStyles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardView}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        
+        <ScrollView 
+          contentContainerStyle={GlobalStyles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
 
-      <Image source={logo} style={GlobalStyles.logo} resizeMode="contain" />
+          <Text style={GlobalStyles.title}>Entrar no SoundShow</Text>
 
-      <Text style={GlobalStyles.title}>Login</Text>
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Email"
+            placeholderTextColor={Colors.textSecondary}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Email"
-        placeholderTextColor={Colors.textSecondary}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Senha"
+            placeholderTextColor={Colors.textSecondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Senha"
-        placeholderTextColor={Colors.textSecondary}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+          {error && (
+            <View style={GlobalStyles.errorContainer}>
+              <Text style={GlobalStyles.errorText}>{error}</Text>
+            </View>
+          )}
 
-      {error && (
-        <View style={GlobalStyles.errorContainer}>
-          <Text style={GlobalStyles.errorText}>{error}</Text>
-        </View>
-      )}
+          <Pressable 
+            style={GlobalStyles.button} 
+            onPress={handleSignIn} 
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.white} />
+            ) : (
+              <Text style={GlobalStyles.buttonText}>Entrar</Text>
+            )}
+          </Pressable>
 
-    <Pressable 
-        style={GlobalStyles.button} 
-        onPress={handleSignIn} 
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={GlobalStyles.buttonText}>Entrar</Text>
-        )}
-      </Pressable>
-
-      <Link href={{ pathname: '/signup' } as any} style={GlobalStyles.linkContainer} asChild>
-        <Pressable>
-          <Text style={GlobalStyles.linkText}>Não tem uma conta? Cadastre-se</Text>
-        </Pressable>
-      </Link>
-    </View>
+          <Link href={{ pathname: '/signup' } as any} style={GlobalStyles.linkContainer} asChild>
+            <Pressable>
+              <Text style={GlobalStyles.linkText}>Não tem uma conta? Cadastre-se</Text>
+            </Pressable>
+          </Link>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
+const styles = StyleSheet.create({
+
+  keyboardView: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  logo: {
+    width: 200, 
+    height: 200, 
+    alignSelf: 'center', 
+    marginBottom: Spacing.xl, 
+  },
+});

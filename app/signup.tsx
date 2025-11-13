@@ -1,9 +1,19 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, Image } from 'react-native';
-import { useState } from 'react';
 import { Link } from 'expo-router';
-import { auth } from '../firebaseConfig';
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { GlobalStyles, Colors } from '../constants/theme';
+import { useState } from 'react';
+import {
+  ActivityIndicator, Image,
+  Keyboard,
+  KeyboardAvoidingView, Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text, TextInput,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native';
+import { Colors, GlobalStyles, Spacing } from '../constants/theme';
+import { auth } from '../firebaseConfig';
 
 const logo = require('../assets/images/logo.png');
 
@@ -70,73 +80,95 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View style={GlobalStyles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardView}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-      <Image source={logo} style={GlobalStyles.logo} resizeMode="contain" />
+        <ScrollView 
+          contentContainerStyle={GlobalStyles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Image source={logo} style={styles.logo} resizeMode="contain" />
 
-      <Text style={GlobalStyles.title}>Criar Conta</Text>
+          <Text style={GlobalStyles.title}>Crie sua conta no SoundShow</Text>
 
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Nome de Usuário"
-        placeholderTextColor={Colors.textSecondary}
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="words"
-      />
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Nome de Usuário"
+            placeholderTextColor={Colors.textSecondary}
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="words"
+          />
 
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Email"
-        placeholderTextColor={Colors.textSecondary}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Email"
+            placeholderTextColor={Colors.textSecondary}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
 
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Senha (mín. 6 caracteres)"
-        placeholderTextColor={Colors.textSecondary}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Senha (mín. 6 caracteres)"
+            placeholderTextColor={Colors.textSecondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Confirmar Senha"
-        placeholderTextColor={Colors.textSecondary}
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Confirmar Senha"
+            placeholderTextColor={Colors.textSecondary}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
 
-      {error && (
-        <View style={GlobalStyles.errorContainer}>
-          <Text style={GlobalStyles.errorText}>{error}</Text>
-        </View>
-      )}
+          {error && (
+            <View style={GlobalStyles.errorContainer}>
+              <Text style={GlobalStyles.errorText}>{error}</Text>
+            </View>
+          )}
 
-      <Pressable 
-        style={GlobalStyles.button} 
-        onPress={handleSignUp} 
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={GlobalStyles.buttonText}>Cadastrar</Text>
-        )}
-      </Pressable>
+          <Pressable 
+            style={GlobalStyles.button} 
+            onPress={handleSignUp} 
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.white} />
+            ) : (
+              <Text style={GlobalStyles.buttonText}>Cadastrar</Text>
+            )}
+          </Pressable>
 
-      <Link href={{ pathname: '/signin' } as any} style={GlobalStyles.linkContainer} asChild>
-        <Pressable>
-          <Text style={GlobalStyles.linkText}>Já tem uma conta? Faça login</Text>
-        </Pressable>
-      </Link>
-    </View>
+          <Link href={{ pathname: '/signin' } as any} style={GlobalStyles.linkContainer} asChild>
+            <Pressable>
+              <Text style={GlobalStyles.linkText}>Já tem uma conta? Faça login</Text>
+            </Pressable>
+          </Link>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
+const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  logo: {
+    width: 200, 
+    height: 200, 
+    alignSelf: 'center', 
+    marginBottom: Spacing.xl, 
+  },
+});
