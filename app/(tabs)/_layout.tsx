@@ -2,18 +2,10 @@ import { Colors } from '@/constants/theme';
 import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
-import MiniPlayer from '../../components/MiniPlayer';
-import { useAudioPlayer } from '../../context/AudioPlayerContext';
-
-const MINI_PLAYER_HEIGHT = 70; // altura da abinha do miniplayer
 
 function TabLayout() {
 
-  const { currentTrack } = useAudioPlayer();
-
   return (
-    <View style={{ flex: 1 }}> 
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors.primary,
@@ -24,10 +16,7 @@ function TabLayout() {
             backgroundColor: Colors.background,
             borderTopColor: Colors.border,
             height: 70,
-            paddingBottom: 5,
-            
-            // se tiver musica tocando, sobe a tabBar
-            bottom: currentTrack ? MINI_PLAYER_HEIGHT : 0, 
+            paddingBottom: 5,    
           },
           
           headerStyle: {
@@ -79,9 +68,6 @@ function TabLayout() {
         />
 
       </Tabs>
-
-      <MiniPlayer />
-    </View>
   );
 }
 

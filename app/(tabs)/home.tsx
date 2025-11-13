@@ -13,17 +13,7 @@ import {
 import { Colors, GlobalStyles, Spacing } from '../../constants/theme';
 import { auth, db } from '../../firebaseConfig';
 
-
-// model do som
-interface Sound {
-  id: string;
-  title: string;
-  artist: string;
-  artworkUrl: string; // URL da capa
-  streamUrl: string;  // URL do .mp3
-  genre: string;
-  playCount?: number;
-}
+import { Sound } from '../../constants/types'; // importando a interface de som
 
 // importando funções do firestore
 import { collection, DocumentData, getDocs, limit, orderBy, query, QueryDocumentSnapshot } from 'firebase/firestore';
@@ -33,8 +23,9 @@ export default function LibraryScreen() {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const { loadSound, currentTrack, isPlaying } = useAudioPlayer();
+
+
+  const { loadSound, currentTrack, isPlaying, setModalTrack } = useAudioPlayer();
 
   useEffect(() => {
     
@@ -112,6 +103,11 @@ export default function LibraryScreen() {
   
   };
 
+  // funcao pra renderizar o modal
+  const handleOpenModal = (track: Sound) => {
+    setModalTrack(track);
+  }
+
   // renderizando cada item da lista
   const renderSoundItem = ({ item }: { item: Sound }) => {
 
@@ -120,25 +116,42 @@ export default function LibraryScreen() {
     const iconColor = isCurrentTrack ? Colors.primary : Colors.text;
 
     return (
-      <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
+
+       <View style={styles.soundItemContainer}>
+        
+        {/* 2. A Capa */}
         <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
-        <View style={styles.soundInfo}>
+        
+        {/* 3. O Bloco de Informação (com flex: 1) */}
+        {/* Este é o novo botão principal de play */}
+        <TouchableOpacity style={styles.soundInfo} onPress={() => handlePlaySound(item)}>
           <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
             {item.title}
           </Text>
           <Text style={styles.soundArtist}>{item.artist}</Text>
-          {item.genre && (
-             <Text style={styles.soundGenre}>{item.genre}</Text>
-          )}
-        </View>
+          <Text style={styles.playCount}>
+            <FontAwesome name="play" size={12} color={Colors.textSecondary} />
+            {` ${item.playCount || 0} plays`} 
+          </Text>
+        </TouchableOpacity>
+
+        {/* 4. Botão "+" (separado) */}
+        <TouchableOpacity 
+          style={styles.plusButton} 
+          onPress={() => handleOpenModal(item)}
+        >
+          <FontAwesome name="plus" size={16} color={Colors.textSecondary} />
+        </TouchableOpacity>
         
-        <View style={styles.playCountContainer}>
-          <FontAwesome name="play" size={12} color={Colors.textSecondary} />
-          <Text style={styles.playCountText}>{item.playCount || 0}</Text>
-        </View>
+        {/* 5. Botão Play (separado) */}
+        <TouchableOpacity 
+          style={styles.playButton} 
+          onPress={() => handlePlaySound(item)}
+        >
+          <FontAwesome name={iconName} size={32} color={iconColor} />
+        </TouchableOpacity>
         
-        <FontAwesome name={iconName} size={32} color={iconColor} />
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -183,22 +196,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.l,
     marginBottom: Spacing.m,
   },
-  soundItem: {
+  
+  // O container da linha inteira
+  soundItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Spacing.m,
-    paddingHorizontal: Spacing.l,
+    paddingLeft: Spacing.l, // Espaço à esquerda
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
+  
+  // O 'soundItem' desapareceu, este é o novo 'soundInfo'
+  soundInfo: {
+    flex: 1, // ⬅️ Este é o estilo que "empurra" os botões
+    justifyContent: 'center',
+    paddingVertical: Spacing.m,
+    marginRight: Spacing.s, // Espaço antes dos botões
+  },
+  
+  // Botão de adicionar à playlist
+  plusButton: {
+    padding: Spacing.m, // Área de clique
+  },
+  
+  // Botão de Play/Pause
+  playButton: {
+    padding: Spacing.m,
+    paddingRight: Spacing.l, // Espaço à direita
+  },
+  
   artwork: {
     width: 60,
     height: 60,
     borderRadius: 8,
     marginRight: Spacing.m,
-  },
-  soundInfo: {
-    flex: 1,
   },
   soundTitle: {
     fontSize: 16,
@@ -209,22 +240,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
   },
+  playCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
   soundGenre: {
     fontSize: 12,
     color: Colors.primary,
     fontWeight: 'bold',
     marginTop: 4,
-  },
-  playCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: Spacing.m,
-  },
-  playCountText: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginLeft: Spacing.s / 2,
-    fontStyle: 'italic',
   },
   emptyText: {
     textAlign: 'center',
