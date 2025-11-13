@@ -118,7 +118,7 @@ export default function LibraryScreen() {
     return (
 
       <View style={styles.soundItemContainer}>
-        {/* Item clicável (para tocar) */}
+
         <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
           <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
           <View style={styles.soundInfo}>
@@ -129,7 +129,7 @@ export default function LibraryScreen() {
             
             <Text style={styles.playCount}>
               <FontAwesome name="play" size={12} color={Colors.textSecondary} />
-              {/* Se playCount não existir, mostra 0 */}
+
               {` ${item.playCount || 0} plays`} 
             </Text>
             
@@ -137,10 +137,9 @@ export default function LibraryScreen() {
           <FontAwesome name={iconName} size={32} color={iconColor} />
         </TouchableOpacity>
 
-        {/* 4. BOTÃO "+" PARA ADICIONAR À PLAYLIST */}
         <TouchableOpacity 
           style={styles.plusButton} 
-          onPress={() => handleOpenModal(item)} // ⬅️ Chama a nova função
+          onPress={() => handleOpenModal(item)}
         >
           <FontAwesome name="plus" size={16} color={Colors.textSecondary} />
         </TouchableOpacity>
@@ -201,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.m,
-    flex: 1, // ⬅️ ESTE É O VILÃO
+    flex: 1,
   },
   plusButton: {
     paddingHorizontal: Spacing.l,
