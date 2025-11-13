@@ -3,6 +3,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
+import AddtoPlaylistModal from '../../components/AddToPlaylistModal';
 import MiniPlayer from '../../components/MiniPlayer';
 import { useAudioPlayer } from '../../context/AudioPlayerContext';
 
@@ -81,6 +82,9 @@ function TabLayout() {
       </Tabs>
 
       <MiniPlayer />
+
+      <AddtoPlaylistModal />
+      
     </View>
   );
 }
