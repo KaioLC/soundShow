@@ -117,32 +117,40 @@ export default function LibraryScreen() {
 
     return (
 
-      <View style={styles.soundItemContainer}>
-
-        <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
-          <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
-          <View style={styles.soundInfo}>
-            <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
-              {item.title}
-            </Text>
-            <Text style={styles.soundArtist}>{item.artist}</Text>
-            
-            <Text style={styles.playCount}>
-              <FontAwesome name="play" size={12} color={Colors.textSecondary} />
-
-              {` ${item.playCount || 0} plays`} 
-            </Text>
-            
-          </View>
-          <FontAwesome name={iconName} size={32} color={iconColor} />
+       <View style={styles.soundItemContainer}>
+        
+        {/* 2. A Capa */}
+        <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
+        
+        {/* 3. O Bloco de Informação (com flex: 1) */}
+        {/* Este é o novo botão principal de play */}
+        <TouchableOpacity style={styles.soundInfo} onPress={() => handlePlaySound(item)}>
+          <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
+            {item.title}
+          </Text>
+          <Text style={styles.soundArtist}>{item.artist}</Text>
+          <Text style={styles.playCount}>
+            <FontAwesome name="play" size={12} color={Colors.textSecondary} />
+            {` ${item.playCount || 0} plays`} 
+          </Text>
         </TouchableOpacity>
 
+        {/* 4. Botão "+" (separado) */}
         <TouchableOpacity 
           style={styles.plusButton} 
           onPress={() => handleOpenModal(item)}
         >
           <FontAwesome name="plus" size={16} color={Colors.textSecondary} />
         </TouchableOpacity>
+        
+        {/* 5. Botão Play (separado) */}
+        <TouchableOpacity 
+          style={styles.playButton} 
+          onPress={() => handlePlaySound(item)}
+        >
+          <FontAwesome name={iconName} size={32} color={iconColor} />
+        </TouchableOpacity>
+        
       </View>
     );
   };
@@ -189,31 +197,39 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.m,
   },
   
+  // O container da linha inteira
   soundItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: Spacing.l,
+    paddingLeft: Spacing.l, // Espaço à esquerda
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  soundItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  
+  // O 'soundItem' desapareceu, este é o novo 'soundInfo'
+  soundInfo: {
+    flex: 1, // ⬅️ Este é o estilo que "empurra" os botões
+    justifyContent: 'center',
     paddingVertical: Spacing.m,
-    flex: 1,
+    marginRight: Spacing.s, // Espaço antes dos botões
   },
+  
+  // Botão de adicionar à playlist
   plusButton: {
-    paddingHorizontal: Spacing.l,
-    paddingVertical: Spacing.m,
+    padding: Spacing.m, // Área de clique
   },
+  
+  // Botão de Play/Pause
+  playButton: {
+    padding: Spacing.m,
+    paddingRight: Spacing.l, // Espaço à direita
+  },
+  
   artwork: {
     width: 60,
     height: 60,
     borderRadius: 8,
     marginRight: Spacing.m,
-  },
-  soundInfo: {
-    flex: 1,
   },
   soundTitle: {
     fontSize: 16,

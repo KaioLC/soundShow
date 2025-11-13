@@ -29,7 +29,7 @@ export default function ExploreScreen() {
   const [allSounds, setAllSounds] = useState<Sound[]>([]);
   const [filteredSounds, setFilteredSounds] = useState<Sound[]>([]);
   
-  const { loadSound, currentTrack, isPlaying } = useAudioPlayer();
+  const { loadSound, currentTrack, isPlaying, setModalTrack } = useAudioPlayer();
 
  
   useEffect(() => {
@@ -104,6 +104,9 @@ export default function ExploreScreen() {
     loadSound(sound); 
   };
 
+  const handleOpenModal = (track: Sound) => {
+    setModalTrack(track);
+  }
 
   const renderSoundItem = ({ item }: { item: Sound }) => {
     const isCurrentTrack = currentTrack?.id === item.id;
@@ -111,9 +114,11 @@ export default function ExploreScreen() {
     const iconColor = isCurrentTrack ? Colors.primary : Colors.text;
 
     return (
-      <TouchableOpacity style={styles.soundItem} onPress={() => handlePlaySound(item)}>
+      <View style={styles.soundItemContainer}>
+        
         <Image source={{ uri: item.artworkUrl || 'https://placehold.co/60' }} style={styles.artwork} />
-        <View style={styles.soundInfo}>
+        
+        <TouchableOpacity style={styles.soundInfo} onPress={() => handlePlaySound(item)}>
           <Text style={[styles.soundTitle, isCurrentTrack && { color: Colors.primary }]}>
             {item.title}
           </Text>
@@ -121,9 +126,22 @@ export default function ExploreScreen() {
           {item.genre && (
              <Text style={styles.soundGenre}>{item.genre}</Text>
           )}
-        </View>
-        <FontAwesome name={iconName} size={32} color={iconColor} />
-      </TouchableOpacity>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.plusButton} 
+          onPress={() => handleOpenModal(item)}
+        >
+          <FontAwesome name="plus" size={16} color={Colors.textSecondary} />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.playButton} 
+          onPress={() => handlePlaySound(item)}
+        >
+          <FontAwesome name={iconName} size={32} color={iconColor} />
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -204,22 +222,31 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
 
-  soundItem: {
+  soundItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Spacing.m,
-    paddingHorizontal: Spacing.l,
+    paddingLeft: Spacing.l,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  soundInfo: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: Spacing.m,
+    marginRight: Spacing.s,
+  },
+  plusButton: {
+    padding: Spacing.m,
+  },
+  playButton: {
+    padding: Spacing.m,
+    paddingRight: Spacing.l,
   },
   artwork: {
     width: 60,
     height: 60,
     borderRadius: 8,
     marginRight: Spacing.m,
-  },
-  soundInfo: {
-    flex: 1,
   },
   soundTitle: {
     fontSize: 16,
