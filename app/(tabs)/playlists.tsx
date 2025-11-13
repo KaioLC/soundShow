@@ -25,12 +25,17 @@ import {
 
 import { Playlist } from '../../constants/types'; // importando playlist interface
 
+import { useRouter } from 'expo-router';
+
+
 export default function PlaylistsScreen() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     
@@ -112,10 +117,11 @@ export default function PlaylistsScreen() {
   };
 
   const handlePlaylistPress = (playlist: Playlist) => {
-    // implementar navegacao pra tela de detalhes da playlist
+    
     console.log("Abrir playlist:", playlist.name, "com", playlist.songIds.length, "músicas");
-    // lembra de usar o router.push(`/playlist/${playlist.id}`);
-    alert(`Abrir playlist: ${playlist.name}`);
+    router.push(`/playlists/${playlist.id}` as any);
+
+    // alert(`Abrir playlist: ${playlist.name}`);
   };
 
   // renderizacao de cada item da playlist
