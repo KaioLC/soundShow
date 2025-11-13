@@ -18,15 +18,8 @@ import { collection, DocumentData, getDocs, QueryDocumentSnapshot } from 'fireba
 
 import { useAudioPlayer } from '../../context/AudioPlayerContext';
 
-interface Sound {
-  id: string;
-  title: string;
-  artist: string;
-  artworkUrl: string;
-  streamUrl: string;
-  genre: string;
-  playCount?: number;
-}
+import { Sound } from '../../constants/types'; // importando a interface de som
+
 
 export default function ExploreScreen() {
   const [loading, setLoading] = useState(true);

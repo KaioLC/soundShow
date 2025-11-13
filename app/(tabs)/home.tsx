@@ -13,17 +13,7 @@ import {
 import { Colors, GlobalStyles, Spacing } from '../../constants/theme';
 import { auth, db } from '../../firebaseConfig';
 
-
-// model do som
-interface Sound {
-  id: string;
-  title: string;
-  artist: string;
-  artworkUrl: string; // URL da capa
-  streamUrl: string;  // URL do .mp3
-  genre: string;
-  playCount?: number;
-}
+import { Sound } from '../../constants/types'; // importando a interface de som
 
 // importando funções do firestore
 import { collection, DocumentData, getDocs, limit, orderBy, query, QueryDocumentSnapshot } from 'firebase/firestore';

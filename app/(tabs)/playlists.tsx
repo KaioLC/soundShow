@@ -23,12 +23,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 
-interface Playlist {
-  id: string;
-  name: string;
-  createdAt: Timestamp;
-  songIds: string[]; 
-}
+import { Playlist } from '../../constants/types'; // importando playlist interface
 
 export default function PlaylistsScreen() {
   const [loading, setLoading] = useState(true);

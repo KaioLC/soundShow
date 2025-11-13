@@ -3,17 +3,9 @@ import { doc, increment, updateDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
 
+import { Sound } from '../constants/types'; // pegando a interface Sound
 
-// definindo interface do som
-interface Sound {
-  id: string;
-  title: string;
-  artist: string;
-  artworkUrl: string;
-  streamUrl: string;
-  genre: string;
-  playCount?: number;
-}
+
 
 // o que o contexto vai fornecer
 interface AudioPlayerContextData {
@@ -29,6 +21,9 @@ interface AudioPlayerContextData {
   setVolume: (value: number) => Promise<void>;
 
   unloadSound: () => Promise<void>;
+
+  modalTrack: Sound | null;
+  setModalTrack: (track: Sound | null) => void; // funcao de abrir e fechar o modal
 }
 
 // criando o contexto
@@ -43,6 +38,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus | null>(null);
 
   const [currentVolume, setCurrentVolume] = useState(1.0); // volume entre 0.0 e 1.0
+
+  const [modalTrack, setModalTrack] = useState<Sound | null>(null); // track pro modal
 
   // função que atualiza o progresso da musica
   const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
@@ -154,6 +151,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         currentVolume,
         setVolume,
         unloadSound,
+        modalTrack,
+        setModalTrack,
       }}
     >
       {children}
